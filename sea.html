@@ -683,32 +683,40 @@ a:hover { color: #2a2520; }
   // ---- SECTION D: COUNTRY SUMMARY TABLE ----
   var secD = el('div', { className: 'section' });
   secD.appendChild(el('h2', { textContent: 'Country Summary' }));
-  secD.appendChild(el('p', { className: 'section-sub', textContent: 'Key exposure metrics for each economy, sorted by average exposure score.' }));
+  secD.appendChild(el('p', { className: 'section-sub', textContent: 'Key exposure metrics for each economy, sorted by exposure rate.' }));
 
   var table = el('table', { className: 'data-table' });
   var thead = el('thead');
   var headerRow = el('tr');
-  var cols = ['Country', 'Total Workers', 'Avg Exposure', '% Score 5+', '% Score 7+', 'Most Exposed', 'Least Exposed'];
-  var colClasses = ['', 'num', 'num', 'num', 'num', '', ''];
+  var cols = ['Country', 'Total Workers', 'Avg Score', 'Exposure Rate', 'Workers Exposed', 'Knowledge Share'];
+  var colClasses = ['', 'num', 'num', 'num', 'num', 'num'];
   for (var c = 0; c < cols.length; c++) {
     headerRow.appendChild(el('th', { className: colClasses[c], textContent: cols[c] }));
   }
   thead.appendChild(headerRow);
   table.appendChild(thead);
 
+  // Sort by exposure rate (% score 5+) descending
+  var tableSorted = computed.slice().sort(function(a, b) { return b.stats.highExposurePct - a.stats.highExposurePct; });
+
   var tbody = el('tbody');
-  for (var i = 0; i < computed.length; i++) {
-    var d = computed[i];
+  for (var i = 0; i < tableSorted.length; i++) {
+    var d = tableSorted[i];
     var tr = el('tr');
     tr.appendChild(el('td', { className: 'country-cell', textContent: d.country.flag + ' ' + d.country.name }));
     tr.appendChild(el('td', { className: 'num', textContent: commaFormat(Math.round(d.stats.totalEmp)) + 'K' }));
     var scoreCell = el('td', { className: 'num', textContent: d.stats.avgScore.toFixed(1) });
     scoreCell.style.color = getExposureColor(d.stats.avgScore);
     tr.appendChild(scoreCell);
-    tr.appendChild(el('td', { className: 'num', textContent: d.stats.highExposurePct.toFixed(1) + '%' }));
-    tr.appendChild(el('td', { className: 'num', textContent: d.stats.veryHighPct.toFixed(1) + '%' }));
-    tr.appendChild(el('td', { textContent: d.stats.mostExposed }));
-    tr.appendChild(el('td', { textContent: d.stats.leastExposed }));
+    var rateCell = el('td', { className: 'num', textContent: d.stats.highExposurePct.toFixed(1) + '%' });
+    rateCell.style.fontWeight = '600';
+    tr.appendChild(rateCell);
+    var exposedK = 0;
+    for (var k in d.country.isco) { if (ISCO_SCORES[k] >= 5) exposedK += d.country.isco[k]; }
+    tr.appendChild(el('td', { className: 'num', textContent: exposedK >= 1000 ? (exposedK/1000).toFixed(1) + 'M' : Math.round(exposedK) + 'K' }));
+    var knowledgeK = 0;
+    for (var k2 = 1; k2 <= 4; k2++) { knowledgeK += (d.country.isco[k2] || 0); }
+    tr.appendChild(el('td', { className: 'num', textContent: (knowledgeK / d.stats.totalEmp * 100).toFixed(1) + '%' }));
     tbody.appendChild(tr);
   }
   table.appendChild(tbody);
@@ -779,12 +787,13 @@ a:hover { color: #2a2520; }
 
   var methUl = el('ul');
   var methItems = [
-    'Employment data comes from ILOSTAT for the most recent available year per country (2022\u20132024). All employment figures are in thousands.',
-    'AIOE scores are averaged to the ISCO 1-digit level. Scores represent exposure to AI capabilities, not job displacement risk. High exposure means the occupation involves tasks that overlap with current AI capabilities.',
-    'Weighted average exposure is calculated as the employment-weighted mean of ISCO group scores for each country.',
-    'The five exposure tiers (Minimal through Very High) use consistent breakpoints across all visualizations: 0\u20132, 2\u20134, 4\u20136, 6\u20138, and 8\u201310.',
-    'Malaysia and Myanmar are excluded due to unavailability of ISCO-08 employment data in ILOSTAT for recent years.',
-    'Singapore reports zero employment in ISCO group 0 (Armed Forces), likely due to classification differences in national data.'
+    'Exposure Rate (score 5+): The percentage of a country\u2019s workforce in occupations scoring 5 or higher on the AIOE index. This is our primary cross-country comparison metric. ISCO groups 1 (Managers, 5.8), 2 (Professionals, 6.5), 3 (Technicians, 6.0), and 4 (Clerical Support, 8.2) all score above 5. The exposure rate is effectively the share of the workforce in these four knowledge-work categories.',
+    'How AIOE scoring works: The Felten et al. (2021) AI Occupational Exposure index measures the overlap between 10 AI application areas (reading comprehension, language modeling, image recognition, translation, speech recognition, etc.) and the abilities required by each occupation (from O*NET). A score of 0 means no overlap; 10 means complete overlap. The index specifically captures generative AI capabilities, not robotics or physical automation.',
+    'Why scores are the same across countries: AIOE is based on standardized task descriptions (O*NET), not local labor conditions. The assumption is that a "Clerical Support Worker" performs similar tasks whether in Manila, Jakarta, or Singapore. Cross-country differences in this dashboard come entirely from workforce composition, not from different exposure levels within the same occupation.',
+    'What this does not capture: country-specific AI adoption rates, infrastructure readiness, wage effects, industrial robotics, manufacturing automation, or informal economy dynamics. A factory worker scores low because their tasks don\u2019t overlap with what language models can do, not because their job is immune to all technology.',
+    'How this differs from ILO figures: The ILO\u2019s 2026 GenAI brief reports the Philippines at 27.2% exposure using a different methodology (task-level generative AI potential with a different threshold). Our 21.5% uses the AIOE score-5+ cutoff. Both approaches identify the Philippines as the most exposed ASEAN economy; the difference is in threshold definition.',
+    'Employment data comes from ILOSTAT for the most recent available year per country (2022\u20132024). Malaysia and Myanmar are excluded due to unavailability of ISCO-08 data.',
+    'Weighted average score is the employment-weighted mean of ISCO group AIOE scores for each country. The five exposure tiers use consistent breakpoints: 0\u20132, 2\u20134, 4\u20136, 6\u20138, 8\u201310.'
   ];
   for (var i = 0; i < methItems.length; i++) {
     methUl.appendChild(el('li', { textContent: methItems[i] }));
