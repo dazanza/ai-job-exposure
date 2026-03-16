@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Exposure Across Southeast Asia</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #faf8f5;
+  color: #2a2520;
+  line-height: 1.6;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+h1, h2, h3 {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-weight: 700;
+  color: #2a2520;
+}
+
+a { color: #5a5248; }
+a:hover { color: #2a2520; }
+
+.divider {
+  border: none;
+  border-top: 1px solid #e8e3dc;
+  margin: 0;
+}
+
+/* ---- HEADER ---- */
+.header {
+  padding: 80px 0 64px;
+}
+.header h1 {
+  font-size: 42px;
+  line-height: 1.15;
+  margin-bottom: 16px;
+  letter-spacing: -0.5px;
+}
+.header .subtitle {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 20px;
+  font-weight: 400;
+  font-style: italic;
+  color: #5a5248;
+  line-height: 1.5;
+  margin-bottom: 12px;
+  max-width: 680px;
+}
+.header .note {
+  font-size: 13px;
+  color: #7a7168;
+  margin-bottom: 32px;
+}
+.header .summary {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #3a352e;
+  max-width: 760px;
+}
+.header .summary strong {
+  color: #2a2520;
+  font-weight: 700;
+}
+.header .nav-link {
+  display: inline-block;
+  margin-top: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #5a5248;
+  text-decoration: none;
+  border-bottom: 1px solid #d0c9c0;
+}
+.header .nav-link:hover { color: #2a2520; border-bottom-color: #2a2520; }
+
+/* ---- SECTIONS ---- */
+.section {
+  padding: 64px 0;
+}
+.section h2 {
+  font-size: 28px;
+  margin-bottom: 6px;
+  letter-spacing: -0.3px;
+}
+.section .section-sub {
+  font-size: 14px;
+  color: #7a7168;
+  margin-bottom: 28px;
+  max-width: 760px;
+  line-height: 1.6;
+}
+
+/* ---- STACKED BAR CHARTS ---- */
+.stacked-chart { max-width: 960px; }
+.stacked-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0ebe4;
+  gap: 12px;
+}
+.stacked-row:last-child { border-bottom: none; }
+.stacked-label {
+  width: 220px;
+  flex-shrink: 0;
+}
+.stacked-label .country-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2a2520;
+  display: block;
+  line-height: 1.3;
+}
+.stacked-label .country-meta {
+  font-size: 12px;
+  color: #7a7168;
+  display: block;
+  line-height: 1.3;
+}
+.stacked-track {
+  flex: 1;
+  height: 30px;
+  display: flex;
+  border-radius: 2px;
+  overflow: hidden;
+  gap: 2px;
+}
+.stacked-segment {
+  height: 100%;
+  min-width: 1px;
+  transition: opacity 0.15s;
+  cursor: default;
+  position: relative;
+}
+.stacked-segment:hover { opacity: 0.8; }
+.stacked-score {
+  width: 48px;
+  text-align: right;
+  font-size: 15px;
+  font-weight: 700;
+  flex-shrink: 0;
+  font-family: 'Source Sans 3', sans-serif;
+}
+
+/* ---- LEGEND ---- */
+.legend {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 12px;
+  color: #7a7168;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.legend-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+}
+
+/* ---- ISCO COMPOSITION LEGEND ---- */
+.isco-legend {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  font-size: 12px;
+  color: #7a7168;
+}
+.isco-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.isco-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+/* ---- DATA TABLE ---- */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  max-width: 960px;
+}
+.data-table th {
+  text-align: left;
+  font-weight: 600;
+  color: #5a5248;
+  padding: 10px 12px;
+  border-bottom: 2px solid #e8e3dc;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.data-table th.num { text-align: right; }
+.data-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f0ebe4;
+  color: #3a352e;
+}
+.data-table td.num {
+  text-align: right;
+  font-family: 'Source Sans 3', sans-serif;
+  font-weight: 600;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table .country-cell {
+  font-weight: 600;
+  color: #2a2520;
+}
+
+/* ---- INSIGHTS ---- */
+.insights {
+  max-width: 760px;
+}
+.insight-paragraph {
+  font-size: 16px;
+  line-height: 1.75;
+  color: #3a352e;
+  margin-bottom: 24px;
+}
+.insight-paragraph:last-child { margin-bottom: 0; }
+.insight-paragraph strong {
+  color: #2a2520;
+  font-weight: 700;
+}
+
+/* ---- TOOLTIP ---- */
+.tooltip {
+  position: fixed;
+  background: #2a2520;
+  color: #faf8f5;
+  padding: 12px 16px;
+  border-radius: 4px;
+  font-size: 13px;
+  pointer-events: none;
+  z-index: 1000;
+  max-width: 280px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  display: none;
+  font-family: 'Source Sans 3', sans-serif;
+}
+.tooltip .tt-name { font-weight: 700; margin-bottom: 2px; font-size: 14px; }
+.tooltip .tt-row { display: flex; justify-content: space-between; gap: 20px; font-size: 12px; padding: 1px 0; }
+.tooltip .tt-row-val { font-weight: 600; }
+
+/* ---- FOOTER ---- */
+.footer {
+  padding: 48px 0 64px;
+}
+.footer .sources {
+  font-size: 13px;
+  color: #7a7168;
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+.footer .sources strong { color: #5a5248; }
+.methodology-toggle {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #5a5248;
+  background: none;
+  border: none;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.methodology-toggle:hover { color: #2a2520; }
+.methodology-content {
+  display: none;
+  margin-top: 16px;
+  font-size: 14px;
+  color: #5a5248;
+  line-height: 1.7;
+  max-width: 760px;
+}
+.methodology-content.open { display: block; }
+.methodology-content ul {
+  margin: 8px 0 8px 20px;
+  list-style-type: disc;
+}
+.methodology-content li { margin-bottom: 6px; }
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 768px) {
+  .container { padding: 0 20px; }
+  .header { padding: 48px 0 40px; }
+  .header h1 { font-size: 30px; }
+  .header .subtitle { font-size: 17px; }
+  .section { padding: 40px 0; }
+  .section h2 { font-size: 22px; }
+  .stacked-label { width: 140px; }
+  .stacked-label .country-name { font-size: 13px; }
+  .stacked-label .country-meta { font-size: 11px; }
+  .data-table { font-size: 12px; }
+  .data-table th, .data-table td { padding: 8px 6px; }
+  .insight-paragraph { font-size: 15px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container" id="app"></div>
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ---- DATA ----
+  var COUNTRIES = [
+    {
+      name: "Philippines", code: "PHL", flag: "\uD83C\uDDF5\uD83C\uDDED", year: 2023, total: 46938.5,
+      isco: { 0: 92.3, 1: 1881.0, 2: 2682.2, 3: 1988.4, 4: 3523.6, 5: 11039.9, 6: 5234.8, 7: 3354.2, 8: 3961.9, 9: 13180.1 }
+    },
+    {
+      name: "Indonesia", code: "IDN", flag: "\uD83C\uDDEE\uD83C\uDDE9", year: 2023, total: 139242.4,
+      isco: { 0: 540.0, 1: 2993.6, 2: 8381.2, 3: 4126.0, 4: 5783.4, 5: 34844.0, 6: 30106.8, 7: 16139.8, 8: 9316.1, 9: 27011.6 }
+    },
+    {
+      name: "Thailand", code: "THA", flag: "\uD83C\uDDF9\uD83C\uDDED", year: 2024, total: 39743.8,
+      isco: { 0: 66.1, 1: 1306.0, 2: 2198.9, 3: 1873.9, 4: 1814.5, 5: 8650.6, 6: 10432.8, 7: 4311.1, 8: 4246.4, 9: 4843.5 }
+    },
+    {
+      name: "Vietnam", code: "VNM", flag: "\uD83C\uDDFB\uD83C\uDDF3", year: 2024, total: 53744.7,
+      isco: { 0: 308.6, 1: 470.2, 2: 3859.8, 3: 1580.8, 4: 1293.0, 5: 10332.9, 6: 8165.7, 7: 7188.6, 8: 7635.9, 9: 12909.3 }
+    },
+    {
+      name: "Singapore", code: "SGP", flag: "\uD83C\uDDF8\uD83C\uDDEC", year: 2024, total: 2259.7,
+      isco: { 0: 0, 1: 404.9, 2: 619.9, 3: 436.2, 4: 205.7, 5: 241.6, 6: 2.7, 7: 54.8, 8: 128.4, 9: 165.7 }
+    },
+    {
+      name: "Cambodia", code: "KHM", flag: "\uD83C\uDDF0\uD83C\uDDED", year: 2023, total: 9756.3,
+      isco: { 0: 6.4, 1: 136.5, 2: 423.4, 3: 166.8, 4: 236.4, 5: 2073.1, 6: 2893.8, 7: 1067.3, 8: 670.1, 9: 2082.5 }
+    },
+    {
+      name: "Laos", code: "LAO", flag: "\uD83C\uDDF1\uD83C\uDDE6", year: 2022, total: 3509.3,
+      isco: { 0: 15.2, 1: 52.8, 2: 210.6, 3: 60.6, 4: 73.9, 5: 568.3, 6: 1661.4, 7: 260.7, 8: 166.2, 9: 439.5 }
+    },
+    {
+      name: "Brunei", code: "BRN", flag: "\uD83C\uDDE7\uD83C\uDDF3", year: 2024, total: 223.0,
+      isco: { 0: 6.5, 1: 18.3, 2: 36.6, 3: 26.6, 4: 14.3, 5: 46.7, 6: 1.3, 7: 18.3, 8: 12.1, 9: 42.3 }
+    }
+  ];
+
+  var ISCO_SCORES = {
+    0: 3.0, 1: 5.8, 2: 6.5, 3: 6.0, 4: 8.2, 5: 2.8, 6: 0.5, 7: 1.8, 8: 3.0, 9: 0.5
+  };
+
+  var ISCO_NAMES = {
+    0: "Armed Forces", 1: "Managers", 2: "Professionals", 3: "Technicians",
+    4: "Clerical Support", 5: "Services & Sales", 6: "Skilled Agriculture",
+    7: "Craft & Trades", 8: "Machine Operators", 9: "Elementary Occupations"
+  };
+
+  var TIER_DEFS = [
+    { label: "Minimal (0\u20132)", min: 0, max: 2 },
+    { label: "Low (2\u20134)", min: 2, max: 4 },
+    { label: "Moderate (4\u20136)", min: 4, max: 6 },
+    { label: "High (6\u20138)", min: 6, max: 8 },
+    { label: "Very High (8\u201310)", min: 8, max: 10 }
+  ];
+
+  // ---- UTILITY ----
+  function getExposureColor(score) {
+    var t = Math.max(0, Math.min(score / 10, 1));
+    var r, g, b;
+    if (t < 0.25) {
+      var p = t / 0.25;
+      r = Math.round(138 + p * (190 - 138));
+      g = Math.round(154 + p * (170 - 154));
+      b = Math.round(114 + p * (120 - 114));
+    } else if (t < 0.5) {
+      var p = (t - 0.25) / 0.25;
+      r = Math.round(190 + p * (210 - 190));
+      g = Math.round(170 + p * (155 - 170));
+      b = Math.round(120 + p * (70 - 120));
+    } else if (t < 0.75) {
+      var p = (t - 0.5) / 0.25;
+      r = Math.round(210 + p * (190 - 210));
+      g = Math.round(155 + p * (100 - 155));
+      b = Math.round(70 + p * (55 - 70));
+    } else {
+      var p = (t - 0.75) / 0.25;
+      r = Math.round(190 + p * (155 - 190));
+      g = Math.round(100 + p * (62 - 100));
+      b = Math.round(55 + p * (48 - 55));
+    }
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
+  }
+
+  function getTierColor(tierIndex) {
+    var midpoints = [1, 3, 5, 7, 9];
+    return getExposureColor(midpoints[tierIndex]);
+  }
+
+  function el(tag, attrs, children) {
+    var node = document.createElement(tag);
+    if (attrs) {
+      for (var k in attrs) {
+        if (k === 'style' && typeof attrs[k] === 'object') {
+          for (var s in attrs[k]) node.style[s] = attrs[k][s];
+        } else if (k === 'className') {
+          node.className = attrs[k];
+        } else if (k === 'textContent') {
+          node.textContent = attrs[k];
+        } else {
+          node.setAttribute(k, attrs[k]);
+        }
+      }
+    }
+    if (children) {
+      if (!Array.isArray(children)) children = [children];
+      for (var i = 0; i < children.length; i++) {
+        if (typeof children[i] === 'string') {
+          node.appendChild(document.createTextNode(children[i]));
+        } else if (children[i]) {
+          node.appendChild(children[i]);
+        }
+      }
+    }
+    return node;
+  }
+
+  function formatNum(n) {
+    if (n >= 1000) return (n / 1000).toFixed(1) + 'M';
+    return n.toFixed(0) + 'K';
+  }
+
+  function commaFormat(n) {
+    return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
+
+  // ---- COMPUTE ----
+  function computeCountry(c) {
+    var weightedSum = 0;
+    var totalEmp = 0;
+    var tierEmp = [0, 0, 0, 0, 0]; // emp per tier
+    for (var g = 0; g <= 9; g++) {
+      var emp = c.isco[g] || 0;
+      var score = ISCO_SCORES[g];
+      weightedSum += emp * score;
+      totalEmp += emp;
+      // classify into tier
+      for (var t = 0; t < TIER_DEFS.length; t++) {
+        if (score >= TIER_DEFS[t].min && score < TIER_DEFS[t].max) {
+          tierEmp[t] += emp;
+          break;
+        }
+        if (t === TIER_DEFS.length - 1) tierEmp[t] += emp; // score == 10
+      }
+    }
+    var avgScore = totalEmp > 0 ? weightedSum / totalEmp : 0;
+    var highExposureEmp = 0; // score >= 5
+    var veryHighEmp = 0; // score >= 7
+    for (var g = 0; g <= 9; g++) {
+      var emp = c.isco[g] || 0;
+      if (ISCO_SCORES[g] >= 5) highExposureEmp += emp;
+      if (ISCO_SCORES[g] >= 7) veryHighEmp += emp;
+    }
+    // find most/least exposed groups (by employment, among groups with >0 emp)
+    var maxGroup = -1, maxScore = -1, minGroup = -1, minScore = 11;
+    for (var g = 0; g <= 9; g++) {
+      if ((c.isco[g] || 0) > 0) {
+        if (ISCO_SCORES[g] > maxScore) { maxScore = ISCO_SCORES[g]; maxGroup = g; }
+        if (ISCO_SCORES[g] < minScore) { minScore = ISCO_SCORES[g]; minGroup = g; }
+      }
+    }
+    return {
+      avgScore: avgScore,
+      tierEmp: tierEmp,
+      totalEmp: totalEmp,
+      highExposureEmp: highExposureEmp,
+      highExposurePct: totalEmp > 0 ? highExposureEmp / totalEmp * 100 : 0,
+      veryHighEmp: veryHighEmp,
+      veryHighPct: totalEmp > 0 ? veryHighEmp / totalEmp * 100 : 0,
+      mostExposed: maxGroup >= 0 ? ISCO_NAMES[maxGroup] : '-',
+      leastExposed: minGroup >= 0 ? ISCO_NAMES[minGroup] : '-'
+    };
+  }
+
+  // compute all
+  var computed = [];
+  var regionTotal = 0;
+  var regionWeightedSum = 0;
+  var regionHighEmp = 0;
+  for (var i = 0; i < COUNTRIES.length; i++) {
+    var c = COUNTRIES[i];
+    var stats = computeCountry(c);
+    computed.push({ country: c, stats: stats });
+    regionTotal += stats.totalEmp;
+    regionWeightedSum += stats.avgScore * stats.totalEmp;
+    regionHighEmp += stats.highExposureEmp;
+  }
+  var regionAvg = regionTotal > 0 ? regionWeightedSum / regionTotal : 0;
+  var regionHighPct = regionTotal > 0 ? regionHighEmp / regionTotal * 100 : 0;
+
+  // sort by avg exposure desc
+  computed.sort(function(a, b) { return b.stats.avgScore - a.stats.avgScore; });
+
+  var app = document.getElementById('app');
+  var tooltip = document.getElementById('tooltip');
+
+  // ---- SECTION A: HEADER ----
+  var header = el('div', { className: 'header' });
+  header.appendChild(el('h1', { textContent: 'AI Exposure Across Southeast Asia' }));
+  header.appendChild(el('p', { className: 'subtitle', textContent: 'A cross-country comparison of how generative AI affects nearly 296 million workers across 8 economies' }));
+  header.appendChild(el('p', { className: 'note', textContent: 'Based on ILOSTAT employment data (2022\u20132024) and Felten et al. AIOE exposure scoring. Malaysia and Myanmar excluded due to data unavailability.' }));
+
+  var summaryP = el('p', { className: 'summary' });
+  summaryP.appendChild(document.createTextNode('The weighted average exposure score across the region is '));
+  summaryP.appendChild(el('strong', { textContent: regionAvg.toFixed(1) + ' out of 10' }));
+  summaryP.appendChild(document.createTextNode(', with '));
+  summaryP.appendChild(el('strong', { textContent: (regionHighEmp / 1000).toFixed(1) + 'M workers (' + regionHighPct.toFixed(0) + '%)' }));
+  summaryP.appendChild(document.createTextNode(' in high-exposure occupations (score 5+).'));
+  header.appendChild(summaryP);
+
+  var navLink = el('a', { className: 'nav-link', href: 'index.html', textContent: 'See also: Philippines deep-dive \u2192' });
+  header.appendChild(navLink);
+
+  app.appendChild(header);
+  app.appendChild(el('hr', { className: 'divider' }));
+
+  // ---- SECTION B: COUNTRY RANKING STACKED BAR ----
+  var secB = el('div', { className: 'section' });
+  secB.appendChild(el('h2', { textContent: 'Country Ranking by AI Exposure' }));
+  secB.appendChild(el('p', { className: 'section-sub', textContent: 'Workforce distribution across five exposure tiers, sorted by weighted average score.' }));
+
+  // Tier legend
+  var legendB = el('div', { className: 'legend' });
+  for (var t = 0; t < TIER_DEFS.length; t++) {
+    var item = el('div', { className: 'legend-item' });
+    item.appendChild(el('div', { className: 'legend-swatch', style: { background: getTierColor(t) } }));
+    item.appendChild(el('span', { textContent: TIER_DEFS[t].label }));
+    legendB.appendChild(item);
+  }
+  secB.appendChild(legendB);
+
+  var chartB = el('div', { className: 'stacked-chart' });
+  for (var i = 0; i < computed.length; i++) {
+    var d = computed[i];
+    var row = el('div', { className: 'stacked-row' });
+
+    var label = el('div', { className: 'stacked-label' });
+    label.appendChild(el('span', { className: 'country-name', textContent: d.country.flag + ' ' + d.country.name }));
+    label.appendChild(el('span', { className: 'country-meta', textContent: formatNum(d.stats.totalEmp) + ' workers \u00B7 ' + d.country.year }));
+    row.appendChild(label);
+
+    var track = el('div', { className: 'stacked-track' });
+    for (var t = 0; t < TIER_DEFS.length; t++) {
+      var pct = d.stats.totalEmp > 0 ? d.stats.tierEmp[t] / d.stats.totalEmp * 100 : 0;
+      if (pct > 0) {
+        var seg = el('div', { className: 'stacked-segment', style: { width: pct + '%', background: getTierColor(t) } });
+        (function(tierLabel, emp, pctVal, countryName) {
+          seg.addEventListener('mouseenter', function(e) {
+            tooltip.style.display = 'block';
+            tooltip.textContent = '';
+            tooltip.appendChild(el('div', { className: 'tt-name', textContent: countryName }));
+            var r1 = el('div', { className: 'tt-row' });
+            r1.appendChild(el('span', { textContent: tierLabel }));
+            r1.appendChild(el('span', { className: 'tt-row-val', textContent: formatNum(emp) + ' (' + pctVal.toFixed(1) + '%)' }));
+            tooltip.appendChild(r1);
+          });
+          seg.addEventListener('mousemove', function(e) {
+            tooltip.style.left = (e.clientX + 12) + 'px';
+            tooltip.style.top = (e.clientY - 10) + 'px';
+          });
+          seg.addEventListener('mouseleave', function() {
+            tooltip.style.display = 'none';
+          });
+        })(TIER_DEFS[t].label, d.stats.tierEmp[t], pct, d.country.name);
+        track.appendChild(seg);
+      }
+    }
+    row.appendChild(track);
+
+    row.appendChild(el('div', { className: 'stacked-score', textContent: d.stats.avgScore.toFixed(1), style: { color: getExposureColor(d.stats.avgScore) } }));
+    chartB.appendChild(row);
+  }
+  secB.appendChild(chartB);
+
+  app.appendChild(secB);
+  app.appendChild(el('hr', { className: 'divider' }));
+
+  // ---- SECTION C: WORKFORCE COMPOSITION ----
+  var secC = el('div', { className: 'section' });
+  secC.appendChild(el('h2', { textContent: 'Why Exposure Varies: Workforce Structure' }));
+  secC.appendChild(el('p', { className: 'section-sub', textContent: 'Countries with more knowledge workers show higher AI exposure. The scores per occupation are the same globally; what differs is how many people work in each category.' }));
+
+  var chartC = el('div', { className: 'stacked-chart' });
+  // ISCO display order: by score descending for visual clarity
+  var iscoOrder = [4, 2, 3, 1, 0, 8, 5, 7, 6, 9];
+
+  for (var i = 0; i < computed.length; i++) {
+    var d = computed[i];
+    var row = el('div', { className: 'stacked-row' });
+
+    var label = el('div', { className: 'stacked-label' });
+    label.appendChild(el('span', { className: 'country-name', textContent: d.country.flag + ' ' + d.country.name }));
+    label.appendChild(el('span', { className: 'country-meta', textContent: formatNum(d.stats.totalEmp) + ' workers' }));
+    row.appendChild(label);
+
+    var track = el('div', { className: 'stacked-track' });
+    for (var j = 0; j < iscoOrder.length; j++) {
+      var g = iscoOrder[j];
+      var emp = d.country.isco[g] || 0;
+      var pct = d.stats.totalEmp > 0 ? emp / d.stats.totalEmp * 100 : 0;
+      if (pct > 0.3) {
+        var seg = el('div', { className: 'stacked-segment', style: { width: pct + '%', background: getExposureColor(ISCO_SCORES[g]) } });
+        (function(groupName, score, empVal, pctVal, countryName) {
+          seg.addEventListener('mouseenter', function(e) {
+            tooltip.style.display = 'block';
+            tooltip.textContent = '';
+            tooltip.appendChild(el('div', { className: 'tt-name', textContent: countryName }));
+            var r1 = el('div', { className: 'tt-row' });
+            r1.appendChild(el('span', { textContent: groupName }));
+            r1.appendChild(el('span', { className: 'tt-row-val', textContent: formatNum(empVal) }));
+            tooltip.appendChild(r1);
+            var r2 = el('div', { className: 'tt-row' });
+            r2.appendChild(el('span', { textContent: 'Share of workforce' }));
+            r2.appendChild(el('span', { className: 'tt-row-val', textContent: pctVal.toFixed(1) + '%' }));
+            tooltip.appendChild(r2);
+            var r3 = el('div', { className: 'tt-row' });
+            r3.appendChild(el('span', { textContent: 'Exposure score' }));
+            r3.appendChild(el('span', { className: 'tt-row-val', textContent: score.toFixed(1) + '/10' }));
+            tooltip.appendChild(r3);
+          });
+          seg.addEventListener('mousemove', function(e) {
+            tooltip.style.left = (e.clientX + 12) + 'px';
+            tooltip.style.top = (e.clientY - 10) + 'px';
+          });
+          seg.addEventListener('mouseleave', function() {
+            tooltip.style.display = 'none';
+          });
+        })(ISCO_NAMES[g], ISCO_SCORES[g], emp, pct, d.country.name);
+        track.appendChild(seg);
+      }
+    }
+    row.appendChild(track);
+
+    row.appendChild(el('div', { className: 'stacked-score', textContent: d.stats.avgScore.toFixed(1), style: { color: getExposureColor(d.stats.avgScore) } }));
+    chartC.appendChild(row);
+  }
+  secC.appendChild(chartC);
+
+  // ISCO legend
+  var iscoLeg = el('div', { className: 'isco-legend' });
+  for (var j = 0; j < iscoOrder.length; j++) {
+    var g = iscoOrder[j];
+    var item = el('div', { className: 'isco-legend-item' });
+    item.appendChild(el('div', { className: 'isco-swatch', style: { background: getExposureColor(ISCO_SCORES[g]) } }));
+    item.appendChild(el('span', { textContent: ISCO_NAMES[g] + ' (' + ISCO_SCORES[g].toFixed(1) + ')' }));
+    iscoLeg.appendChild(item);
+  }
+  secC.appendChild(iscoLeg);
+
+  app.appendChild(secC);
+  app.appendChild(el('hr', { className: 'divider' }));
+
+  // ---- SECTION D: COUNTRY SUMMARY TABLE ----
+  var secD = el('div', { className: 'section' });
+  secD.appendChild(el('h2', { textContent: 'Country Summary' }));
+  secD.appendChild(el('p', { className: 'section-sub', textContent: 'Key exposure metrics for each economy, sorted by average exposure score.' }));
+
+  var table = el('table', { className: 'data-table' });
+  var thead = el('thead');
+  var headerRow = el('tr');
+  var cols = ['Country', 'Total Workers', 'Avg Exposure', '% Score 5+', '% Score 7+', 'Most Exposed', 'Least Exposed'];
+  var colClasses = ['', 'num', 'num', 'num', 'num', '', ''];
+  for (var c = 0; c < cols.length; c++) {
+    headerRow.appendChild(el('th', { className: colClasses[c], textContent: cols[c] }));
+  }
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  var tbody = el('tbody');
+  for (var i = 0; i < computed.length; i++) {
+    var d = computed[i];
+    var tr = el('tr');
+    tr.appendChild(el('td', { className: 'country-cell', textContent: d.country.flag + ' ' + d.country.name }));
+    tr.appendChild(el('td', { className: 'num', textContent: commaFormat(Math.round(d.stats.totalEmp)) + 'K' }));
+    var scoreCell = el('td', { className: 'num', textContent: d.stats.avgScore.toFixed(1) });
+    scoreCell.style.color = getExposureColor(d.stats.avgScore);
+    tr.appendChild(scoreCell);
+    tr.appendChild(el('td', { className: 'num', textContent: d.stats.highExposurePct.toFixed(1) + '%' }));
+    tr.appendChild(el('td', { className: 'num', textContent: d.stats.veryHighPct.toFixed(1) + '%' }));
+    tr.appendChild(el('td', { textContent: d.stats.mostExposed }));
+    tr.appendChild(el('td', { textContent: d.stats.leastExposed }));
+    tbody.appendChild(tr);
+  }
+  table.appendChild(tbody);
+  secD.appendChild(table);
+
+  app.appendChild(secD);
+  app.appendChild(el('hr', { className: 'divider' }));
+
+  // ---- SECTION E: KEY FINDINGS ----
+  var secE = el('div', { className: 'section' });
+  secE.appendChild(el('h2', { textContent: 'Key Findings' }));
+
+  var insights = el('div', { className: 'insights' });
+
+  var findings = [
+    [
+      'Singapore stands out',
+      ' as the most exposed economy per capita. With virtually no agricultural workforce (2,700 people) and a heavy concentration in professionals (620K) and managers (405K), its knowledge-economy structure maps almost directly onto the occupations most affected by generative AI. A knowledge economy is, by definition, an AI-exposed economy.'
+    ],
+    [
+      "The Philippines' BPO effect",
+      ' is visible in the data. Despite being a middle-income country with a substantial agricultural sector, the Philippines ranks near the top of the exposure index because of its outsized clerical support workforce: 3.5 million workers scoring 8.2 out of 10. The business process outsourcing industry, which employs a significant share of that clerical labor, pulls the national average upward in a way that distinguishes the Philippines from peers at similar income levels.'
+    ],
+    [
+      "Indonesia's sheer scale",
+      ' deserves attention. At 139 million workers, it is the largest labor force in ASEAN by a wide margin. High exposure scores are diluted by 30 million agricultural workers and 27 million in elementary occupations. But in absolute numbers, Indonesia has more workers in high-exposure categories than any other country in the region. The policy challenge is proportionally enormous.'
+    ],
+    [
+      'Cambodia and Laos',
+      ' remain heavily agriculture-dependent, with 30 to 47 percent of their workforces in skilled agricultural occupations. This keeps their aggregate AI exposure low for now. As both economies develop and services sectors expand, their exposure profiles will shift upward, following the pattern set by their more developed neighbors.'
+    ],
+    [
+      'The common structural pattern',
+      ' across all eight countries is worth noting: ISCO group 4 (Clerical Support) scores highest at 8.2 out of 10, and ISCO group 6 (Skilled Agriculture) scores lowest at 0.5 out of 10. The variation between countries comes entirely from how many people work in each category, not from different exposure levels within categories. Workforce structure is the variable; occupational exposure is the constant.'
+    ]
+  ];
+
+  for (var i = 0; i < findings.length; i++) {
+    var p = el('p', { className: 'insight-paragraph' });
+    p.appendChild(el('strong', { textContent: findings[i][0] }));
+    p.appendChild(document.createTextNode(findings[i][1]));
+    insights.appendChild(p);
+  }
+  secE.appendChild(insights);
+
+  app.appendChild(secE);
+  app.appendChild(el('hr', { className: 'divider' }));
+
+  // ---- SECTION F: SOURCES + FOOTER ----
+  var footer = el('div', { className: 'footer' });
+
+  var sources = el('div', { className: 'sources' });
+  sources.appendChild(el('strong', { textContent: 'Sources: ' }));
+  sources.appendChild(document.createTextNode('ILOSTAT, Employment by Occupation (ISCO-08, 1-digit), 2022\u20132024. Felten, E., Raj, M., & Seamans, R. (2021), "Occupational, Industry, and Geographic Exposure to Artificial Intelligence." ILO GenAI and Jobs Brief (2026).'));
+  footer.appendChild(sources);
+
+  // Methodology toggle
+  var methToggle = el('button', { className: 'methodology-toggle' });
+  methToggle.appendChild(document.createTextNode('Methodology '));
+  var arrow = el('span', { textContent: '\u25B6' });
+  methToggle.appendChild(arrow);
+  footer.appendChild(methToggle);
+
+  var methContent = el('div', { className: 'methodology-content' });
+  var methP1 = el('p');
+  methP1.appendChild(document.createTextNode('This dashboard maps AI occupational exposure scores from the Felten et al. AIOE index onto ILOSTAT employment data at the ISCO-08 1-digit level. The AIOE index measures how much each occupation is exposed to advances in AI capabilities, scored on a 0\u201310 scale.'));
+  methContent.appendChild(methP1);
+
+  var methUl = el('ul');
+  var methItems = [
+    'Employment data comes from ILOSTAT for the most recent available year per country (2022\u20132024). All employment figures are in thousands.',
+    'AIOE scores are averaged to the ISCO 1-digit level. Scores represent exposure to AI capabilities, not job displacement risk. High exposure means the occupation involves tasks that overlap with current AI capabilities.',
+    'Weighted average exposure is calculated as the employment-weighted mean of ISCO group scores for each country.',
+    'The five exposure tiers (Minimal through Very High) use consistent breakpoints across all visualizations: 0\u20132, 2\u20134, 4\u20136, 6\u20138, and 8\u201310.',
+    'Malaysia and Myanmar are excluded due to unavailability of ISCO-08 employment data in ILOSTAT for recent years.',
+    'Singapore reports zero employment in ISCO group 0 (Armed Forces), likely due to classification differences in national data.'
+  ];
+  for (var i = 0; i < methItems.length; i++) {
+    methUl.appendChild(el('li', { textContent: methItems[i] }));
+  }
+  methContent.appendChild(methUl);
+  footer.appendChild(methContent);
+
+  methToggle.addEventListener('click', function() {
+    methContent.classList.toggle('open');
+    arrow.textContent = methContent.classList.contains('open') ? '\u25BC' : '\u25B6';
+  });
+
+  // Nav link back
+  var backNav = el('p', { style: { marginTop: '24px' } });
+  var backLink = el('a', { href: 'index.html', textContent: '\u2190 Philippines deep-dive dashboard', style: { fontSize: '14px', fontWeight: '600', color: '#5a5248', textDecoration: 'none', borderBottom: '1px solid #d0c9c0' } });
+  backNav.appendChild(backLink);
+  footer.appendChild(backNav);
+
+  app.appendChild(footer);
+
+})();
+</script>
+</body>
+</html>
