@@ -380,7 +380,7 @@ h1, h2, h3 {
 }
 .profile-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 32px;
 }
 .profile-block {}
@@ -1023,10 +1023,63 @@ function squarify(items, rect) {
     { name: 'Services', score: 4.8 }
   ]));
 
+  // ---- Block 6: Total Wages Exposed ----
+  // Approximate annual wages per ISCO group (PHP, from PSA 2024 OWS)
+  // Converted: monthly wage × 12. Sources: PSA Occupational Wages Survey 2024
+  var annualWageByIsco = {
+    0: 360000,  // Armed Forces ~30K/mo
+    1: 540000,  // Managers ~45K/mo
+    2: 420000,  // Professionals ~35K/mo
+    3: 336000,  // Technicians ~28K/mo
+    4: 252000,  // Clerical ~21K/mo
+    5: 192000,  // Services & Sales ~16K/mo
+    6: 156000,  // Skilled Agriculture ~13K/mo
+    7: 216000,  // Craft & Trades ~18K/mo
+    8: 228000,  // Machine Operators ~19K/mo
+    9: 168000   // Elementary ~14K/mo
+  };
+  var totalWagesExposed = 0; // in PHP, for score >= 5
+  all.forEach(function(o) {
+    if (o.score >= 5) {
+      totalWagesExposed += o.emp * 1000 * (annualWageByIsco[o.isco] || 252000);
+    }
+  });
+  // Convert to trillions PHP
+  var wagesTrillion = totalWagesExposed / 1e12;
+  // Convert to billions USD (approx PHP 56 = 1 USD)
+  var wagesBillionUsd = totalWagesExposed / 56 / 1e9;
+
+  var block6 = document.createElement('div');
+  block6.className = 'profile-block';
+
+  var h6 = document.createElement('div');
+  h6.className = 'profile-headline';
+  h6.style.color = '#a3423a';
+  var mainVal = document.createTextNode('\u20B1' + wagesTrillion.toFixed(1) + 'T');
+  h6.appendChild(mainVal);
+  block6.appendChild(h6);
+
+  var l6 = document.createElement('div');
+  l6.className = 'profile-label';
+  l6.textContent = 'Annual wages exposed (score 5+)';
+  block6.appendChild(l6);
+
+  var usdLine = document.createElement('div');
+  usdLine.style.cssText = 'font-size:13px;color:#7a7168;margin-top:8px;';
+  usdLine.textContent = '~$' + wagesBillionUsd.toFixed(0) + 'B USD equivalent';
+  block6.appendChild(usdLine);
+
+  var wageSub = document.createElement('div');
+  wageSub.style.cssText = 'font-size:11px;color:#a09890;margin-top:6px;line-height:1.4;';
+  wageSub.textContent = 'Total annual earnings of workers in occupations scoring 5+ on AI exposure. Based on PSA 2024 average wages by ISCO group.';
+  block6.appendChild(wageSub);
+
+  grid.appendChild(block6);
+
   // ---- Footnote ----
   var footnote = document.createElement('div');
   footnote.className = 'profile-footnote';
-  footnote.textContent = 'Education, wage, and sector breakdowns from IMF WP/25/43 (Philippine LFS microdata)';
+  footnote.textContent = 'Education, wage, and sector breakdowns from IMF WP/25/43. Wages from PSA Occupational Wages Survey 2024.';
   grid.appendChild(footnote);
 })();
 
