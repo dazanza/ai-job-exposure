@@ -304,6 +304,59 @@ a:hover { color: #2a2520; }
 }
 .methodology-content li { margin-bottom: 6px; }
 
+/* ---- REGIONAL TREEMAP ---- */
+.treemap-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #faf8f5;
+  overflow: hidden;
+}
+.treemap-container .tm-node {
+  position: absolute;
+  overflow: hidden;
+  cursor: default;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2px;
+  transition: opacity 0.12s;
+}
+.treemap-container .tm-node:hover { opacity: 0.85; }
+.treemap-container .tm-group-label {
+  position: absolute;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255,255,255,0.85);
+  pointer-events: none;
+  z-index: 2;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  line-height: 1.2;
+}
+.treemap-container .tm-child-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.95);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+  line-height: 1.2;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+.treemap-container .tm-child-emp {
+  font-size: 10px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.8);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  line-height: 1.2;
+  text-align: center;
+}
+
 /* ---- RESPONSIVE ---- */
 @media (max-width: 768px) {
   .container { padding: 0 20px; }
@@ -605,6 +658,245 @@ a:hover { color: #2a2520; }
   app.appendChild(secB);
   app.appendChild(el('hr', { className: 'divider' }));
 
+  // ---- SECTION B2: REGIONAL TREEMAP ----
+  (function() {
+    var secTM = el('div', { className: 'section', id: 'regional-treemap' });
+    secTM.appendChild(el('h2', { textContent: 'Regional Workforce at a Glance' }));
+    secTM.appendChild(el('p', { className: 'section-sub', textContent: '295.4 million workers across 8 Southeast Asian economies. Size represents employment. Color indicates AI exposure score.' }));
+
+    var treemapEl = el('div', { className: 'treemap-container' });
+    secTM.appendChild(treemapEl);
+
+    // ISCO legend below treemap
+    var iscoOrder = [4, 2, 3, 1, 0, 8, 5, 7, 6, 9];
+    var tmLeg = el('div', { className: 'isco-legend' });
+    for (var j = 0; j < iscoOrder.length; j++) {
+      var g = iscoOrder[j];
+      var item = el('div', { className: 'isco-legend-item' });
+      item.appendChild(el('div', { className: 'isco-swatch', style: { background: getExposureColor(ISCO_SCORES[g]) } }));
+      item.appendChild(el('span', { textContent: ISCO_NAMES[g] + ' (' + ISCO_SCORES[g].toFixed(1) + ')' }));
+      tmLeg.appendChild(item);
+    }
+    secTM.appendChild(tmLeg);
+
+    app.appendChild(secTM);
+    app.appendChild(el('hr', { className: 'divider' }));
+
+    // Squarify algorithm (from index.html)
+    function squarify(items, rect) {
+      if (!items.length) return [];
+      var totalValue = 0;
+      for (var i = 0; i < items.length; i++) totalValue += items[i].value;
+      if (totalValue <= 0) return [];
+      var sorted = items.slice().sort(function(a,b){return b.value-a.value});
+      var results = [];
+      var scale = (rect.w * rect.h) / totalValue;
+      var scaled = sorted.map(function(item) {
+        var copy = {};
+        for (var k in item) copy[k] = item[k];
+        copy.scaledValue = item.value * scale;
+        return copy;
+      });
+
+      function worst(row, rowArea, side) {
+        if (!row.length || side<=0 || rowArea<=0) return Infinity;
+        var s2 = rowArea*rowArea, maxR=0;
+        for (var i=0;i<row.length;i++) {
+          var v=row[i].scaledValue;
+          maxR = Math.max(maxR, Math.max((side*side*v)/s2, s2/(side*side*v)));
+        }
+        return maxR;
+      }
+
+      function layoutRow(row, rowArea, r) {
+        var isWide = r.w >= r.h;
+        var side = isWide ? r.h : r.w;
+        if (side<=0||rowArea<=0) return r;
+        var rowLen = rowArea / side;
+        var offset = 0;
+        for (var i=0;i<row.length;i++) {
+          var itemLen = (row[i].scaledValue/rowArea)*side;
+          var res = {};
+          for (var k in row[i]) res[k] = row[i][k];
+          if (isWide) { res.x=r.x; res.y=r.y+offset; res.w=rowLen; res.h=itemLen; }
+          else { res.x=r.x+offset; res.y=r.y; res.w=itemLen; res.h=rowLen; }
+          results.push(res);
+          offset += itemLen;
+        }
+        if (isWide) return {x:r.x+rowLen, y:r.y, w:r.w-rowLen, h:r.h};
+        return {x:r.x, y:r.y+rowLen, w:r.w, h:r.h-rowLen};
+      }
+
+      var remaining = scaled.slice();
+      var currentRect = {x:rect.x, y:rect.y, w:rect.w, h:rect.h};
+      while (remaining.length > 0) {
+        var side = Math.min(currentRect.w, currentRect.h);
+        if (side<=0) break;
+        var row = [remaining[0]];
+        var rowArea = remaining[0].scaledValue;
+        var bestWorst = worst(row, rowArea, side);
+        var idx = 1;
+        while (idx < remaining.length) {
+          var newRow = row.concat([remaining[idx]]);
+          var newArea = rowArea + remaining[idx].scaledValue;
+          var newWorst = worst(newRow, newArea, side);
+          if (newWorst <= bestWorst) {
+            row = newRow; rowArea = newArea; bestWorst = newWorst; idx++;
+          } else break;
+        }
+        currentRect = layoutRow(row, rowArea, currentRect);
+        remaining = remaining.slice(idx);
+      }
+      return results;
+    }
+
+    // Build treemap data: Level 1 = ISCO groups, Level 2 = countries within each group
+    function buildTreemapData() {
+      var groups = [];
+      for (var g = 0; g <= 9; g++) {
+        var totalEmp = 0;
+        var children = [];
+        for (var i = 0; i < COUNTRIES.length; i++) {
+          var emp = COUNTRIES[i].isco[g] || 0;
+          if (emp > 0) {
+            children.push({
+              value: emp,
+              name: COUNTRIES[i].name,
+              emp: emp,
+              countryTotal: COUNTRIES[i].total,
+              code: COUNTRIES[i].code
+            });
+            totalEmp += emp;
+          }
+        }
+        if (totalEmp > 0) {
+          groups.push({
+            value: totalEmp,
+            iscoGroup: g,
+            groupName: ISCO_NAMES[g],
+            score: ISCO_SCORES[g],
+            children: children
+          });
+        }
+      }
+      return groups;
+    }
+
+    function renderTreemap() {
+      treemapEl.textContent = '';
+      var W = treemapEl.clientWidth;
+      var H = treemapEl.clientHeight;
+      if (W === 0 || H === 0) return;
+
+      var groupData = buildTreemapData();
+      var groupItems = groupData.map(function(g) {
+        return { value: g.value, iscoGroup: g.iscoGroup, groupName: g.groupName, score: g.score, children: g.children };
+      });
+
+      var groupRects = squarify(groupItems, {x: 0, y: 0, w: W, h: H});
+
+      groupRects.forEach(function(gr) {
+        var groupInset = 2;
+        var innerRect = {
+          x: gr.x + groupInset,
+          y: gr.y + groupInset,
+          w: Math.max(0, gr.w - groupInset * 2),
+          h: Math.max(0, gr.h - groupInset * 2)
+        };
+        if (innerRect.w <= 0 || innerRect.h <= 0) return;
+
+        // Group label
+        if (innerRect.w > 50 && innerRect.h > 24) {
+          var groupLabel = document.createElement('div');
+          groupLabel.className = 'tm-group-label';
+          groupLabel.textContent = gr.groupName;
+          groupLabel.style.left = (innerRect.x + 3) + 'px';
+          groupLabel.style.top = (innerRect.y + 2) + 'px';
+          groupLabel.style.maxWidth = (innerRect.w - 6) + 'px';
+          groupLabel.style.overflow = 'hidden';
+          groupLabel.style.whiteSpace = 'nowrap';
+          groupLabel.style.textOverflow = 'ellipsis';
+          treemapEl.appendChild(groupLabel);
+        }
+
+        // Squarify children (countries) within the group rect
+        var childItems = gr.children.map(function(c) {
+          return { value: c.value, name: c.name, emp: c.emp, countryTotal: c.countryTotal, code: c.code, groupName: gr.groupName, iscoGroup: gr.iscoGroup, score: gr.score };
+        });
+
+        var childRects = squarify(childItems, innerRect);
+
+        childRects.forEach(function(cr) {
+          var childInset = 0.5;
+          var div = document.createElement('div');
+          div.className = 'tm-node';
+          div.style.left = (cr.x + childInset) + 'px';
+          div.style.top = (cr.y + childInset) + 'px';
+          div.style.width = Math.max(0, cr.w - childInset * 2) + 'px';
+          div.style.height = Math.max(0, cr.h - childInset * 2) + 'px';
+          div.style.background = getExposureColor(cr.score);
+          div.style.border = '0.5px solid rgba(255,255,255,0.3)';
+
+          var cellW = cr.w - childInset * 2;
+          var cellH = cr.h - childInset * 2;
+
+          if (cellW > 60 && cellH > 28) {
+            var nameSpan = document.createElement('span');
+            nameSpan.className = 'tm-child-name';
+            nameSpan.textContent = cr.name;
+            div.appendChild(nameSpan);
+
+            var empSpan = document.createElement('span');
+            empSpan.className = 'tm-child-emp';
+            empSpan.textContent = formatNum(cr.emp);
+            div.appendChild(empSpan);
+          }
+
+          (function(item) {
+            div.addEventListener('mousemove', function(e) {
+              tooltip.style.display = 'block';
+              tooltip.style.left = Math.min(e.clientX + 14, window.innerWidth - 300) + 'px';
+              tooltip.style.top = (e.clientY + 14) + 'px';
+              tooltip.textContent = '';
+
+              tooltip.appendChild(el('div', { className: 'tt-name', textContent: item.name }));
+
+              var rows = [
+                ['Occupation group', item.groupName],
+                ['Employment', formatNum(item.emp)],
+                ['Exposure score', item.score.toFixed(1) + '/10'],
+                ['Share of country workforce', (item.emp / item.countryTotal * 100).toFixed(1) + '%']
+              ];
+              for (var r = 0; r < rows.length; r++) {
+                var ttRow = el('div', { className: 'tt-row' });
+                ttRow.appendChild(el('span', { textContent: rows[r][0] }));
+                ttRow.appendChild(el('span', { className: 'tt-row-val', textContent: rows[r][1] }));
+                tooltip.appendChild(ttRow);
+              }
+            });
+            div.addEventListener('mouseleave', function() {
+              tooltip.style.display = 'none';
+            });
+          })(cr);
+
+          treemapEl.appendChild(div);
+        });
+      });
+    }
+
+    // Initial render after layout settles
+    requestAnimationFrame(function() {
+      requestAnimationFrame(renderTreemap);
+    });
+
+    // Debounced resize
+    var resizeTimer;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(renderTreemap, 150);
+    });
+  })();
+
   // ---- SECTION C: WORKFORCE COMPOSITION ----
   var secC = el('div', { className: 'section' });
   secC.appendChild(el('h2', { textContent: 'Why Exposure Varies: Workforce Structure' }));
@@ -770,7 +1062,24 @@ a:hover { color: #2a2520; }
 
   var sources = el('div', { className: 'sources' });
   sources.appendChild(el('strong', { textContent: 'Sources: ' }));
-  sources.appendChild(document.createTextNode('ILOSTAT, Employment by Occupation (ISCO-08, 1-digit), 2022\u20132024. Felten, E., Raj, M., & Seamans, R. (2021), "Occupational, Industry, and Geographic Exposure to Artificial Intelligence." ILO GenAI and Jobs Brief (2026).'));
+  sources.appendChild(document.createTextNode('ILOSTAT, Employment by Occupation (ISCO-08, 1-digit), 2022\u20132024. Felten, E., Raj, M., & Seamans, R. (2021), "Occupational, Industry, and Geographic Exposure to Artificial Intelligence." ILO GenAI and Jobs Brief (2026). '));
+
+  var inspiredBy = document.createElement('span');
+  inspiredBy.textContent = 'Inspired by ';
+  var linkKale = document.createElement('a');
+  linkKale.href = 'https://joshkale.github.io/jobs/';
+  linkKale.textContent = "Josh Kale\u2019s US analysis";
+  linkKale.style.cssText = 'color:#7a7168;border-bottom:1px solid #c8c0b4;text-decoration:none;';
+  inspiredBy.appendChild(linkKale);
+  inspiredBy.appendChild(document.createTextNode(' and '));
+  var linkPeterman = document.createElement('a');
+  linkPeterman.href = 'https://mtjpeterman.github.io/eu-ai-exposure-index/';
+  linkPeterman.textContent = "MTJPeterman\u2019s EU index";
+  linkPeterman.style.cssText = 'color:#7a7168;border-bottom:1px solid #c8c0b4;text-decoration:none;';
+  inspiredBy.appendChild(linkPeterman);
+  inspiredBy.appendChild(document.createTextNode('.'));
+  sources.appendChild(inspiredBy);
+
   footer.appendChild(sources);
 
   // Methodology toggle
