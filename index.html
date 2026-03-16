@@ -361,6 +361,126 @@ h1, h2, h3 {
 }
 .methodology-content li { margin-bottom: 6px; }
 
+/* ---- EXPOSURE PROFILE (Sidebar Metrics) ---- */
+.exposure-profile {
+  padding: 48px 0;
+}
+.exposure-profile h2 {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #2a2520;
+  margin-bottom: 6px;
+  letter-spacing: -0.3px;
+}
+.exposure-profile .section-sub {
+  font-size: 14px;
+  color: #7a7168;
+  margin-bottom: 28px;
+}
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 32px;
+}
+.profile-block {}
+.profile-headline {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 36px;
+  font-weight: 700;
+  color: #2a2520;
+  line-height: 1.1;
+}
+.profile-headline .unit {
+  font-size: 18px;
+  font-weight: 400;
+  color: #7a7168;
+}
+.profile-label {
+  font-size: 13px;
+  color: #7a7168;
+  margin-bottom: 14px;
+  line-height: 1.3;
+}
+.mini-histogram {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 50px;
+}
+.mini-hist-bar {
+  flex: 1;
+  border-radius: 1px 1px 0 0;
+  min-height: 1px;
+}
+.mini-tier-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 18px;
+  font-size: 11px;
+  color: #5a5248;
+  line-height: 1;
+}
+.mini-tier-swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+.mini-tier-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mini-tier-count {
+  font-weight: 600;
+  white-space: nowrap;
+}
+.mini-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.mini-bar-label {
+  font-size: 11px;
+  color: #5a5248;
+  width: 72px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mini-bar-track {
+  flex: 1;
+  height: 8px;
+  background: #f0ebe4;
+  border-radius: 1px;
+}
+.mini-bar-fill {
+  height: 100%;
+  border-radius: 1px;
+  min-width: 1px;
+}
+.mini-bar-score {
+  font-size: 11px;
+  font-weight: 600;
+  color: #3a352e;
+  width: 22px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.profile-footnote {
+  margin-top: 24px;
+  font-size: 11px;
+  color: #9a9288;
+  line-height: 1.5;
+  font-style: italic;
+  grid-column: 1 / -1;
+}
+
 /* ---- RESPONSIVE ---- */
 @media (max-width: 768px) {
   .container { padding: 0 20px; }
@@ -372,6 +492,23 @@ h1, h2, h3 {
   .bar-label { width: 180px; }
   .bar-label .bar-name { font-size: 13px; }
   .treemap-wrap { aspect-ratio: 4 / 3; }
+  .profile-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+  .profile-block {
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e8e3dc;
+  }
+  .profile-block:last-of-type {
+    border-bottom: none;
+  }
+  .exposure-profile h2 { font-size: 22px; }
+}
+@media (max-width: 480px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
 </head>
@@ -387,6 +524,13 @@ h1, h2, h3 {
     <p class="subtitle">An analysis of how artificial intelligence could affect 46.9 million workers in the domestic labor force</p>
     <p class="note">Based on ILOSTAT 2023 data and IMF occupational exposure scoring. Excludes ~2.2M overseas Filipino workers.</p>
     <p class="summary" id="summary-text"></p>
+  </div>
+
+  <!-- Exposure Profile: Sidebar Metrics -->
+  <div class="exposure-profile" id="exposure-profile">
+    <h2>Exposure Profile</h2>
+    <p class="section-sub">A snapshot of AI exposure across the Philippine labor force</p>
+    <div class="profile-grid" id="profile-grid"></div>
   </div>
 
   <hr class="divider">
@@ -704,6 +848,186 @@ function squarify(items, rect) {
   container.appendChild(text3);
   container.appendChild(b3);
   container.appendChild(text4);
+})();
+
+/* ================================================================
+   EXPOSURE PROFILE: SIDEBAR METRICS
+   ================================================================ */
+(function() {
+  var all = flatten();
+  var totalEmp = 0, weightedScore = 0;
+  all.forEach(function(o) { totalEmp += o.emp; weightedScore += o.emp * o.score; });
+  var avgScore = weightedScore / totalEmp;
+
+  var grid = document.getElementById('profile-grid');
+
+  // ---- Block 1: Exposure Distribution (mini histogram) ----
+  var bins = [];
+  for (var i = 0; i < 10; i++) bins.push({ lo: i, hi: i + 1, emp: 0 });
+  all.forEach(function(o) {
+    var idx = Math.min(Math.floor(o.score), 9);
+    bins[idx].emp += o.emp;
+  });
+  var maxBinEmp = 0;
+  bins.forEach(function(b) { if (b.emp > maxBinEmp) maxBinEmp = b.emp; });
+
+  var block1 = document.createElement('div');
+  block1.className = 'profile-block';
+
+  var h1 = document.createElement('div');
+  h1.className = 'profile-headline';
+  h1.innerHTML = avgScore.toFixed(1) + '<span class="unit">/10</span>';
+  block1.appendChild(h1);
+
+  var l1 = document.createElement('div');
+  l1.className = 'profile-label';
+  l1.textContent = 'Average Exposure';
+  block1.appendChild(l1);
+
+  var hist = document.createElement('div');
+  hist.className = 'mini-histogram';
+  bins.forEach(function(b) {
+    var bar = document.createElement('div');
+    bar.className = 'mini-hist-bar';
+    var hPct = maxBinEmp > 0 ? (b.emp / maxBinEmp * 100) : 0;
+    bar.style.height = Math.max(hPct, 2) + '%';
+    bar.style.background = getExposureColor((b.lo + b.hi) / 2);
+    hist.appendChild(bar);
+  });
+  block1.appendChild(hist);
+  grid.appendChild(block1);
+
+  // ---- Block 2: Exposure Tiers ----
+  var tiers = [
+    { name: 'Minimal (0\u20132)', lo: 0, hi: 2 },
+    { name: 'Low (2\u20134)', lo: 2, hi: 4 },
+    { name: 'Moderate (4\u20136)', lo: 4, hi: 6 },
+    { name: 'High (6\u20138)', lo: 6, hi: 8 },
+    { name: 'Very High (8\u201310)', lo: 8, hi: 10 }
+  ];
+  tiers.forEach(function(t) { t.emp = 0; });
+  all.forEach(function(o) {
+    for (var i = 0; i < tiers.length; i++) {
+      if (o.score >= tiers[i].lo && (o.score < tiers[i].hi || (i === tiers.length - 1 && o.score <= tiers[i].hi))) {
+        tiers[i].emp += o.emp;
+        break;
+      }
+    }
+  });
+
+  var exposedCount = 0;
+  all.forEach(function(o) { if (o.score >= 5) exposedCount += o.emp; });
+
+  var block2 = document.createElement('div');
+  block2.className = 'profile-block';
+
+  var h2 = document.createElement('div');
+  h2.className = 'profile-headline';
+  h2.textContent = formatEmp(exposedCount);
+  block2.appendChild(h2);
+
+  var l2 = document.createElement('div');
+  l2.className = 'profile-label';
+  l2.textContent = 'Workers Exposed (score 5+)';
+  block2.appendChild(l2);
+
+  tiers.forEach(function(t) {
+    var row = document.createElement('div');
+    row.className = 'mini-tier-row';
+
+    var swatch = document.createElement('span');
+    swatch.className = 'mini-tier-swatch';
+    swatch.style.background = getExposureColor((t.lo + t.hi) / 2);
+    row.appendChild(swatch);
+
+    var name = document.createElement('span');
+    name.className = 'mini-tier-name';
+    name.textContent = t.name;
+    row.appendChild(name);
+
+    var count = document.createElement('span');
+    count.className = 'mini-tier-count';
+    count.textContent = formatEmp(t.emp) + ' (' + (t.emp / totalEmp * 100).toFixed(0) + '%)';
+    row.appendChild(count);
+
+    block2.appendChild(row);
+  });
+  grid.appendChild(block2);
+
+  // ---- Helper: horizontal bar set ----
+  function buildMiniBarBlock(headline, unit, label, bars) {
+    var block = document.createElement('div');
+    block.className = 'profile-block';
+
+    var h = document.createElement('div');
+    h.className = 'profile-headline';
+    h.innerHTML = headline + '<span class="unit">' + unit + '</span>';
+    block.appendChild(h);
+
+    var l = document.createElement('div');
+    l.className = 'profile-label';
+    l.textContent = label;
+    block.appendChild(l);
+
+    bars.forEach(function(b) {
+      var row = document.createElement('div');
+      row.className = 'mini-bar-row';
+
+      var lbl = document.createElement('span');
+      lbl.className = 'mini-bar-label';
+      lbl.textContent = b.name;
+      row.appendChild(lbl);
+
+      var track = document.createElement('div');
+      track.className = 'mini-bar-track';
+      var fill = document.createElement('div');
+      fill.className = 'mini-bar-fill';
+      fill.style.width = (b.score / 10 * 100) + '%';
+      fill.style.background = getExposureColor(b.score);
+      track.appendChild(fill);
+      row.appendChild(track);
+
+      var sc = document.createElement('span');
+      sc.className = 'mini-bar-score';
+      sc.textContent = b.score.toFixed(1);
+      row.appendChild(sc);
+
+      block.appendChild(row);
+    });
+
+    return block;
+  }
+
+  // ---- Block 3: Exposure by Education ----
+  grid.appendChild(buildMiniBarBlock('6.2', '/10', 'College-educated exposure', [
+    { name: 'No Grade', score: 1.0 },
+    { name: 'Elementary', score: 1.5 },
+    { name: 'High School', score: 3.0 },
+    { name: 'Post-Secondary', score: 5.0 },
+    { name: 'College', score: 6.2 }
+  ]));
+
+  // ---- Block 4: Exposure by Wage Quantile ----
+  grid.appendChild(buildMiniBarBlock('5.8', '/10', 'Top earners exposure', [
+    { name: 'Bottom 20%', score: 1.2 },
+    { name: '20\u201340%', score: 2.0 },
+    { name: '40\u201360%', score: 3.5 },
+    { name: '60\u201380%', score: 5.0 },
+    { name: 'Top 20%', score: 5.8 }
+  ]));
+
+  // ---- Block 5: Exposure by Sector ----
+  grid.appendChild(buildMiniBarBlock('4.8', '/10', 'Services sector exposure', [
+    { name: 'Agriculture', score: 0.8 },
+    { name: 'Industry', score: 2.5 },
+    { name: 'Services', score: 4.8 }
+  ]));
+
+  // ---- Footnote ----
+  var footnote = document.createElement('div');
+  footnote.className = 'profile-footnote';
+  footnote.textContent = 'Education, wage, and sector breakdowns from IMF WP/25/43 (Philippine LFS microdata)';
+  grid.appendChild(footnote);
 })();
 
 /* ================================================================
