@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Exposure Across Philippine Occupations</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #faf8f5;
+  color: #2a2520;
+  line-height: 1.6;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+h1, h2, h3 {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-weight: 700;
+  color: #2a2520;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid #e8e3dc;
+  margin: 0;
+}
+
+/* ---- HEADER (Section A) ---- */
+.header {
+  padding: 80px 0 64px;
+}
+.header h1 {
+  font-size: 42px;
+  line-height: 1.15;
+  margin-bottom: 16px;
+  letter-spacing: -0.5px;
+}
+.header .subtitle {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 20px;
+  font-weight: 400;
+  font-style: italic;
+  color: #5a5248;
+  line-height: 1.5;
+  margin-bottom: 12px;
+  max-width: 680px;
+}
+.header .note {
+  font-size: 13px;
+  color: #7a7168;
+  margin-bottom: 32px;
+}
+.header .summary {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #3a352e;
+  max-width: 760px;
+}
+.header .summary strong {
+  color: #2a2520;
+  font-weight: 700;
+}
+
+/* ---- SECTION SPACING ---- */
+.section {
+  padding: 64px 0;
+}
+.section h2 {
+  font-size: 28px;
+  margin-bottom: 6px;
+  letter-spacing: -0.3px;
+}
+.section .section-sub {
+  font-size: 14px;
+  color: #7a7168;
+  margin-bottom: 28px;
+}
+
+/* ---- TREEMAP (Section B) ---- */
+.treemap-controls {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e8e3dc;
+}
+.treemap-controls button {
+  padding: 8px 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #7a7168;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.treemap-controls button.active {
+  color: #2a2520;
+  border-bottom-color: #2a2520;
+}
+.treemap-controls button:hover {
+  color: #2a2520;
+}
+
+.legend {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 12px;
+  color: #7a7168;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.legend-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+}
+
+.treemap-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #faf8f5;
+}
+.treemap-wrap .tm-group-label {
+  position: absolute;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.85);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  pointer-events: none;
+  z-index: 2;
+  padding: 4px 6px;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.treemap-wrap .tm-node {
+  position: absolute;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 3px;
+  transition: opacity 0.1s;
+}
+.treemap-wrap .tm-node:hover { opacity: 0.82; }
+.treemap-wrap .tm-node .tm-name {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  line-height: 1.2;
+  pointer-events: none;
+}
+.treemap-wrap .tm-node .tm-emp {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 10px;
+  color: rgba(255,255,255,0.78);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  pointer-events: none;
+}
+
+/* Tooltip */
+.tooltip {
+  position: fixed;
+  background: #2a2520;
+  color: #faf8f5;
+  padding: 12px 16px;
+  border-radius: 4px;
+  font-size: 13px;
+  pointer-events: none;
+  z-index: 1000;
+  max-width: 280px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  display: none;
+  font-family: 'Source Sans 3', sans-serif;
+}
+.tooltip .tt-name { font-weight: 700; margin-bottom: 2px; font-size: 14px; }
+.tooltip .tt-group { font-size: 12px; color: rgba(250,248,245,0.6); margin-bottom: 8px; }
+.tooltip .tt-row { display: flex; justify-content: space-between; gap: 20px; font-size: 12px; padding: 1px 0; }
+.tooltip .tt-row-val { font-weight: 600; }
+
+/* ---- BAR CHARTS (Sections C & D) ---- */
+.bar-chart { max-width: 820px; }
+.bar-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0ebe4;
+  gap: 12px;
+}
+.bar-row:last-child { border-bottom: none; }
+.bar-label {
+  width: 280px;
+  flex-shrink: 0;
+}
+.bar-label .bar-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2a2520;
+  display: block;
+  line-height: 1.3;
+}
+.bar-label .bar-meta {
+  font-size: 12px;
+  color: #7a7168;
+  display: block;
+  line-height: 1.3;
+}
+.bar-track {
+  flex: 1;
+  height: 20px;
+  background: #f0ebe4;
+  border-radius: 2px;
+  position: relative;
+  max-width: 400px;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  min-width: 2px;
+}
+.bar-score {
+  width: 40px;
+  text-align: right;
+  font-size: 15px;
+  font-weight: 700;
+  flex-shrink: 0;
+  font-family: 'Source Sans 3', sans-serif;
+}
+
+/* ---- HISTOGRAM (Section E) ---- */
+.histogram-wrap { max-width: 700px; }
+.histogram {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 280px;
+  width: 100%;
+  padding-bottom: 32px;
+  position: relative;
+}
+.hist-bar-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+  position: relative;
+}
+.hist-bar {
+  width: 100%;
+  border-radius: 2px 2px 0 0;
+  position: relative;
+}
+.hist-label-top {
+  font-size: 11px;
+  font-weight: 600;
+  color: #3a352e;
+  margin-bottom: 4px;
+  text-align: center;
+  font-family: 'Source Sans 3', sans-serif;
+}
+.hist-label-bottom {
+  font-size: 12px;
+  color: #7a7168;
+  margin-top: 8px;
+  text-align: center;
+  font-family: 'Source Sans 3', sans-serif;
+}
+.histogram-axis-label {
+  text-align: center;
+  font-size: 13px;
+  color: #7a7168;
+  margin-top: 8px;
+  font-family: 'Source Sans 3', sans-serif;
+}
+
+/* ---- INSIGHTS (Section F) ---- */
+.insights {
+  max-width: 760px;
+}
+.insight-paragraph {
+  font-size: 16px;
+  line-height: 1.75;
+  color: #3a352e;
+  margin-bottom: 24px;
+}
+.insight-paragraph:last-child { margin-bottom: 0; }
+.insight-paragraph strong {
+  color: #2a2520;
+  font-weight: 700;
+}
+.insight-source {
+  font-size: 12px;
+  color: #7a7168;
+  font-style: italic;
+}
+
+/* ---- FOOTER ---- */
+.footer {
+  padding: 48px 0 64px;
+}
+.footer .sources {
+  font-size: 13px;
+  color: #7a7168;
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+.footer .sources strong { color: #5a5248; }
+.methodology-toggle {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #5a5248;
+  border: none;
+  background: none;
+  padding: 0;
+  border-bottom: 1px dotted #7a7168;
+}
+.methodology-toggle:hover { color: #2a2520; }
+.methodology-content {
+  display: none;
+  margin-top: 16px;
+  font-size: 14px;
+  color: #5a5248;
+  line-height: 1.7;
+  max-width: 760px;
+}
+.methodology-content.open { display: block; }
+.methodology-content ul {
+  margin: 8px 0 8px 20px;
+  list-style-type: disc;
+}
+.methodology-content li { margin-bottom: 6px; }
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 768px) {
+  .container { padding: 0 20px; }
+  .header { padding: 48px 0 40px; }
+  .header h1 { font-size: 28px; }
+  .header .subtitle { font-size: 17px; }
+  .section { padding: 40px 0; }
+  .section h2 { font-size: 22px; }
+  .bar-label { width: 180px; }
+  .bar-label .bar-name { font-size: 13px; }
+  .treemap-wrap { aspect-ratio: 4 / 3; }
+}
+</style>
+</head>
+<body>
+
+<div class="tooltip" id="tooltip"></div>
+
+<div class="container">
+
+  <!-- Section A: Header -->
+  <div class="header" id="header">
+    <h1>AI Exposure Across Philippine Occupations</h1>
+    <p class="subtitle">An analysis of how artificial intelligence could affect 46.9 million workers in the domestic labor force</p>
+    <p class="note">Based on ILOSTAT 2023 data and IMF occupational exposure scoring. Excludes ~2.2M overseas Filipino workers.</p>
+    <p class="summary" id="summary-text"></p>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Section B: Treemap -->
+  <div class="section" id="treemap-section">
+    <h2>Employment Treemap</h2>
+    <p class="section-sub">Size represents employment volume. Color indicates AI exposure score.</p>
+    <div class="treemap-controls" id="treemap-controls">
+      <button class="active" data-mode="exposure">By Exposure</button>
+      <button data-mode="complementarity">By Complementarity</button>
+    </div>
+    <div class="legend" id="treemap-legend"></div>
+    <div class="treemap-wrap" id="treemap"></div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Section C: Most Exposed -->
+  <div class="section" id="most-exposed">
+    <h2>Most Exposed Occupations</h2>
+    <p class="section-sub">Top 15 by AI exposure score, descending</p>
+    <div class="bar-chart" id="chart-most-exposed"></div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Section D: Least Exposed -->
+  <div class="section" id="least-exposed">
+    <h2>Least Exposed Occupations</h2>
+    <p class="section-sub">Bottom 15 by AI exposure score, ascending</p>
+    <div class="bar-chart" id="chart-least-exposed"></div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Section E: Histogram -->
+  <div class="section" id="distribution">
+    <h2>Exposure Distribution</h2>
+    <p class="section-sub">Employment by AI exposure score bracket (thousands of workers)</p>
+    <div class="histogram-wrap">
+      <div class="histogram" id="histogram"></div>
+      <div class="histogram-axis-label">AI Exposure Score</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Section F: Key Insights -->
+  <div class="section" id="insights">
+    <h2>Key Insights</h2>
+    <p class="section-sub"></p>
+    <div class="insights" id="insights-content"></div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Footer -->
+  <div class="footer" id="footer">
+    <div class="sources">
+      <strong>Sources:</strong> ILOSTAT (2023), IMF Working Paper WP/25/43 (Cucio &amp; Hennig, Feb 2025), Felten et al. (2021) AIOE Index, ILO (2026)
+    </div>
+    <button class="methodology-toggle" id="meth-toggle">Methodology &#9662;</button>
+    <div class="methodology-content" id="meth-content">
+      <ul>
+        <li>AI Exposure scores are derived from the Felten et al. (2021) AI Occupational Exposure (AIOE) index, mapped from SOC codes to ISCO-08 occupation groups.</li>
+        <li>Employment data sourced from ILOSTAT 2023, Philippines domestic Labour Force Survey.</li>
+        <li>Complementarity classification follows Pizzinelli et al. (2023) via the IMF framework, distinguishing roles where AI augments human work (high complementarity) from roles where AI substitutes tasks (low complementarity).</li>
+        <li>Sub-occupation employment estimates within ISCO major groups are approximations based on available disaggregated data and may not sum exactly to official ISCO group totals.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ================================================================
+   DATA
+   ================================================================ */
+var DATA = [
+  { group: "ISCO 1 - Managers", isco: 1, complementarity: "high", children: [
+    { name: "Restaurant/Retail Managers", emp: 500, score: 5.0 },
+    { name: "General & Operations Managers", emp: 450, score: 6.0 },
+    { name: "Production/Specialized Managers", emp: 350, score: 5.5 },
+    { name: "Sales/Marketing Managers", emp: 280, score: 6.5 },
+    { name: "Other Managers", emp: 161, score: 5.0 },
+    { name: "ICT Managers", emp: 80, score: 8.5 },
+    { name: "Chief Executives", emp: 60, score: 7.0 }
+  ]},
+  { group: "ISCO 2 - Professionals", isco: 2, complementarity: "high", children: [
+    { name: "Teaching Professionals", emp: 900, score: 6.0 },
+    { name: "Other Professionals", emp: 582, score: 5.5 },
+    { name: "Nursing/Midwifery Professionals", emp: 350, score: 5.5 },
+    { name: "Accountants/Financial Analysts", emp: 250, score: 9.0 },
+    { name: "Software/IT Professionals", emp: 200, score: 9.5 },
+    { name: "Engineers", emp: 180, score: 6.5 },
+    { name: "Lawyers/Legal Professionals", emp: 120, score: 7.5 },
+    { name: "Medical Doctors", emp: 100, score: 5.5 }
+  ]},
+  { group: "ISCO 3 - Technicians", isco: 3, complementarity: "high", children: [
+    { name: "Other Technicians", emp: 488, score: 5.0 },
+    { name: "Financial/Insurance Clerks", emp: 400, score: 8.5 },
+    { name: "Administrative Associate Prof.", emp: 350, score: 6.5 },
+    { name: "Medical/Pharmaceutical Tech.", emp: 300, score: 5.5 },
+    { name: "ICT Technicians", emp: 250, score: 8.0 },
+    { name: "Legal/Social Associate Prof.", emp: 200, score: 6.0 }
+  ]},
+  { group: "ISCO 4 - Clerical Support", isco: 4, complementarity: "low", children: [
+    { name: "General Office Clerks", emp: 800, score: 8.0 },
+    { name: "Customer Service Reps (BPO)", emp: 750, score: 9.0 },
+    { name: "Secretaries/Admin Assistants", emp: 500, score: 8.5 },
+    { name: "Accounting/Bookkeeping Clerks", emp: 450, score: 9.0 },
+    { name: "Other Clerical", emp: 374, score: 7.0 },
+    { name: "Tellers and Counter Clerks", emp: 350, score: 8.0 },
+    { name: "Data Entry Operators", emp: 300, score: 9.5 }
+  ]},
+  { group: "ISCO 5 - Services & Sales", isco: 5, complementarity: "mixed", children: [
+    { name: "Shop Sales Assistants", emp: 3000, score: 4.0 },
+    { name: "Street/Market Vendors", emp: 2500, score: 1.0 },
+    { name: "Waiters/Bartenders", emp: 1500, score: 2.5 },
+    { name: "Cooks", emp: 1200, score: 2.0 },
+    { name: "Other Service Workers", emp: 940, score: 2.5 },
+    { name: "Security Guards", emp: 800, score: 3.5 },
+    { name: "Hairdressers/Beauty Workers", emp: 600, score: 2.0 },
+    { name: "Personal Care Workers", emp: 500, score: 2.0 }
+  ]},
+  { group: "ISCO 6 - Skilled Agriculture", isco: 6, complementarity: "low_exposure", children: [
+    { name: "Rice/Crop Farmers", emp: 3000, score: 0.5 },
+    { name: "Livestock/Mixed Farmers", emp: 800, score: 0.5 },
+    { name: "Fishery Workers", emp: 700, score: 0.5 },
+    { name: "Other Agricultural", emp: 435, score: 0.3 },
+    { name: "Forestry Workers", emp: 300, score: 0.3 }
+  ]},
+  { group: "ISCO 7 - Craft & Trades", isco: 7, complementarity: "low_exposure", children: [
+    { name: "Building/Construction Workers", emp: 1200, score: 1.5 },
+    { name: "Metal/Machinery Workers", emp: 500, score: 2.0 },
+    { name: "Other Craft Workers", emp: 454, score: 1.5 },
+    { name: "Electrical/Electronic Trades", emp: 450, score: 2.5 },
+    { name: "Garment/Textile Workers", emp: 400, score: 1.5 },
+    { name: "Food Processing Workers", emp: 350, score: 1.5 }
+  ]},
+  { group: "ISCO 8 - Machine Operators", isco: 8, complementarity: "low_exposure", children: [
+    { name: "Motor Vehicle Drivers", emp: 2000, score: 4.0 },
+    { name: "Machine Operators (mfg.)", emp: 800, score: 3.5 },
+    { name: "Assemblers", emp: 500, score: 2.0 },
+    { name: "Other Operators", emp: 362, score: 2.5 },
+    { name: "Mining/Construction Equip. Operators", emp: 300, score: 2.0 }
+  ]},
+  { group: "ISCO 9 - Elementary Occupations", isco: 9, complementarity: "low_exposure", children: [
+    { name: "Domestic Workers/Cleaners", emp: 3500, score: 0.5 },
+    { name: "Agricultural Laborers", emp: 3000, score: 0.3 },
+    { name: "Construction Laborers", emp: 2500, score: 0.5 },
+    { name: "Other Elementary Workers", emp: 2380, score: 0.5 },
+    { name: "Street Vendors", emp: 1500, score: 1.0 },
+    { name: "Garbage Collectors", emp: 300, score: 0.2 }
+  ]},
+  { group: "ISCO 0 - Armed Forces", isco: 0, complementarity: "low_exposure", children: [
+    { name: "Armed Forces Occupations", emp: 92, score: 3.0 }
+  ]}
+];
+
+/* ================================================================
+   UTILITIES
+   ================================================================ */
+function getExposureColor(score) {
+  var t = Math.max(0, Math.min(score / 10, 1));
+  var r, g, b;
+  if (t < 0.25) {
+    var p = t / 0.25;
+    r = Math.round(138 + p * (190 - 138));
+    g = Math.round(154 + p * (170 - 154));
+    b = Math.round(114 + p * (120 - 114));
+  } else if (t < 0.5) {
+    var p = (t - 0.25) / 0.25;
+    r = Math.round(190 + p * (210 - 190));
+    g = Math.round(170 + p * (155 - 170));
+    b = Math.round(120 + p * (70 - 120));
+  } else if (t < 0.75) {
+    var p = (t - 0.5) / 0.25;
+    r = Math.round(210 + p * (190 - 210));
+    g = Math.round(155 + p * (100 - 155));
+    b = Math.round(70 + p * (55 - 70));
+  } else {
+    var p = (t - 0.75) / 0.25;
+    r = Math.round(190 + p * (155 - 190));
+    g = Math.round(100 + p * (62 - 100));
+    b = Math.round(55 + p * (48 - 55));
+  }
+  return 'rgb(' + r + ',' + g + ',' + b + ')';
+}
+
+function getComplementarityColor(comp) {
+  if (comp === 'high') return '#4a4690';
+  if (comp === 'low') return '#a3423a';
+  if (comp === 'mixed') return '#b8943e';
+  return '#b5b0a4';
+}
+
+function formatEmp(emp) {
+  if (emp >= 1000) return (emp / 1000).toFixed(1).replace(/\.0$/, '') + 'M';
+  return emp + 'K';
+}
+
+function flatten() {
+  var result = [];
+  DATA.forEach(function(g) {
+    g.children.forEach(function(c) {
+      result.push({ name: c.name, emp: c.emp, score: c.score, group: g.group, isco: g.isco, complementarity: g.complementarity });
+    });
+  });
+  return result;
+}
+
+/* ================================================================
+   SQUARIFY ALGORITHM
+   ================================================================ */
+function squarify(items, rect) {
+  if (!items.length) return [];
+  var totalValue = 0;
+  for (var i = 0; i < items.length; i++) totalValue += items[i].value;
+  if (totalValue <= 0) return [];
+  var sorted = items.slice().sort(function(a,b){return b.value-a.value});
+  var results = [];
+  var scale = (rect.w * rect.h) / totalValue;
+  var scaled = sorted.map(function(item) {
+    var copy = {};
+    for (var k in item) copy[k] = item[k];
+    copy.scaledValue = item.value * scale;
+    return copy;
+  });
+
+  function worst(row, rowArea, side) {
+    if (!row.length || side<=0 || rowArea<=0) return Infinity;
+    var s2 = rowArea*rowArea, maxR=0;
+    for (var i=0;i<row.length;i++) {
+      var v=row[i].scaledValue;
+      maxR = Math.max(maxR, Math.max((side*side*v)/s2, s2/(side*side*v)));
+    }
+    return maxR;
+  }
+
+  function layoutRow(row, rowArea, r) {
+    var isWide = r.w >= r.h;
+    var side = isWide ? r.h : r.w;
+    if (side<=0||rowArea<=0) return r;
+    var rowLen = rowArea / side;
+    var offset = 0;
+    for (var i=0;i<row.length;i++) {
+      var itemLen = (row[i].scaledValue/rowArea)*side;
+      var res = {};
+      for (var k in row[i]) res[k] = row[i][k];
+      if (isWide) { res.x=r.x; res.y=r.y+offset; res.w=rowLen; res.h=itemLen; }
+      else { res.x=r.x+offset; res.y=r.y; res.w=itemLen; res.h=rowLen; }
+      results.push(res);
+      offset += itemLen;
+    }
+    if (isWide) return {x:r.x+rowLen, y:r.y, w:r.w-rowLen, h:r.h};
+    return {x:r.x, y:r.y+rowLen, w:r.w, h:r.h-rowLen};
+  }
+
+  var remaining = scaled.slice();
+  var currentRect = {x:rect.x, y:rect.y, w:rect.w, h:rect.h};
+  while (remaining.length > 0) {
+    var side = Math.min(currentRect.w, currentRect.h);
+    if (side<=0) break;
+    var row = [remaining[0]];
+    var rowArea = remaining[0].scaledValue;
+    var bestWorst = worst(row, rowArea, side);
+    var idx = 1;
+    while (idx < remaining.length) {
+      var newRow = row.concat([remaining[idx]]);
+      var newArea = rowArea + remaining[idx].scaledValue;
+      var newWorst = worst(newRow, newArea, side);
+      if (newWorst <= bestWorst) {
+        row = newRow; rowArea = newArea; bestWorst = newWorst; idx++;
+      } else break;
+    }
+    currentRect = layoutRow(row, rowArea, currentRect);
+    remaining = remaining.slice(idx);
+  }
+  return results;
+}
+
+/* ================================================================
+   SECTION A: SUMMARY TEXT
+   ================================================================ */
+(function() {
+  var all = flatten();
+  var totalEmp = 0, weightedScore = 0;
+  all.forEach(function(o) { totalEmp += o.emp; weightedScore += o.emp * o.score; });
+  var avgScore = weightedScore / totalEmp;
+
+  var highlyExposed = 0;
+  all.forEach(function(o) { if (o.score >= 7) highlyExposed += o.emp; });
+
+  var lowExposure = 0;
+  all.forEach(function(o) { if (o.score < 4) lowExposure += o.emp; });
+
+  var container = document.getElementById('summary-text');
+  var text1 = document.createTextNode('Of the 46.9M workers, ');
+  var b1 = document.createElement('strong');
+  b1.textContent = (highlyExposed / totalEmp * 100).toFixed(1) + '%';
+  var text2 = document.createTextNode(' are highly exposed to AI (score 7+), while ');
+  var b2 = document.createElement('strong');
+  b2.textContent = (lowExposure / totalEmp * 100).toFixed(1) + '%';
+  var text3 = document.createTextNode(' remain in low-exposure occupations. The average exposure score is ');
+  var b3 = document.createElement('strong');
+  b3.textContent = avgScore.toFixed(1) + ' out of 10';
+  var text4 = document.createTextNode('.');
+
+  container.appendChild(text1);
+  container.appendChild(b1);
+  container.appendChild(text2);
+  container.appendChild(b2);
+  container.appendChild(text3);
+  container.appendChild(b3);
+  container.appendChild(text4);
+})();
+
+/* ================================================================
+   SECTION B: TWO-LEVEL TREEMAP
+   ================================================================ */
+(function() {
+  var treemapEl = document.getElementById('treemap');
+  var tooltip = document.getElementById('tooltip');
+  var currentMode = 'exposure';
+  var resizeTimer = null;
+
+  function render() {
+    treemapEl.textContent = '';
+    var W = treemapEl.clientWidth;
+    var H = treemapEl.clientHeight;
+    if (W === 0 || H === 0) return;
+
+    // Step 1: compute group totals for top-level squarify
+    var groupItems = DATA.map(function(g) {
+      var totalEmp = 0;
+      g.children.forEach(function(c) { totalEmp += c.emp; });
+      return { value: totalEmp, group: g.group, isco: g.isco, complementarity: g.complementarity, children: g.children };
+    });
+
+    // Squarify groups
+    var groupRects = squarify(groupItems, {x: 0, y: 0, w: W, h: H});
+
+    // Step 2: for each group rect, squarify its children inside
+    groupRects.forEach(function(gr) {
+      // Draw group boundary (2px white border via inset)
+      var groupInset = 2;
+      var innerRect = {
+        x: gr.x + groupInset,
+        y: gr.y + groupInset,
+        w: Math.max(0, gr.w - groupInset * 2),
+        h: Math.max(0, gr.h - groupInset * 2)
+      };
+
+      if (innerRect.w <= 0 || innerRect.h <= 0) return;
+
+      // Add group label
+      if (innerRect.w > 60 && innerRect.h > 30) {
+        var groupLabel = document.createElement('div');
+        groupLabel.className = 'tm-group-label';
+        // Short label: just the ISCO category name
+        var shortName = gr.group.replace(/^ISCO \d+ - /, '');
+        groupLabel.textContent = shortName;
+        groupLabel.style.left = (innerRect.x + 2) + 'px';
+        groupLabel.style.top = (innerRect.y + 1) + 'px';
+        // Limit label width to group width
+        groupLabel.style.maxWidth = (innerRect.w - 4) + 'px';
+        groupLabel.style.overflow = 'hidden';
+        groupLabel.style.whiteSpace = 'nowrap';
+        groupLabel.style.textOverflow = 'ellipsis';
+        treemapEl.appendChild(groupLabel);
+      }
+
+      // Squarify children within the group rect
+      var childItems = gr.children.map(function(c) {
+        return { value: c.emp, name: c.name, emp: c.emp, score: c.score, groupName: gr.group, isco: gr.isco, complementarity: gr.complementarity };
+      });
+
+      var childRects = squarify(childItems, innerRect);
+
+      childRects.forEach(function(cr) {
+        var childInset = 0.5;
+        var div = document.createElement('div');
+        div.className = 'tm-node';
+        div.style.left = (cr.x + childInset) + 'px';
+        div.style.top = (cr.y + childInset) + 'px';
+        div.style.width = Math.max(0, cr.w - childInset * 2) + 'px';
+        div.style.height = Math.max(0, cr.h - childInset * 2) + 'px';
+
+        if (currentMode === 'exposure') {
+          div.style.background = getExposureColor(cr.score);
+        } else {
+          div.style.background = getComplementarityColor(cr.complementarity);
+        }
+
+        var cellW = cr.w - childInset * 2;
+        var cellH = cr.h - childInset * 2;
+
+        if (cellW > 48 && cellH > 24) {
+          var nameSpan = document.createElement('span');
+          nameSpan.className = 'tm-name';
+          nameSpan.textContent = cr.name;
+          div.appendChild(nameSpan);
+        }
+        if (cellW > 56 && cellH > 36) {
+          var empSpan = document.createElement('span');
+          empSpan.className = 'tm-emp';
+          empSpan.textContent = formatEmp(cr.emp);
+          div.appendChild(empSpan);
+        }
+
+        (function(item) {
+          div.addEventListener('mousemove', function(e) {
+            tooltip.style.display = 'block';
+            tooltip.style.left = Math.min(e.clientX + 14, window.innerWidth - 300) + 'px';
+            tooltip.style.top = (e.clientY + 14) + 'px';
+
+            tooltip.textContent = '';
+            var ttName = document.createElement('div');
+            ttName.className = 'tt-name';
+            ttName.textContent = item.name;
+            tooltip.appendChild(ttName);
+
+            var ttGroup = document.createElement('div');
+            ttGroup.className = 'tt-group';
+            ttGroup.textContent = item.groupName;
+            tooltip.appendChild(ttGroup);
+
+            var rows = [
+              ['Employment', formatEmp(item.emp)],
+              ['AI Exposure', item.score.toFixed(1) + '/10'],
+              ['Complementarity', item.complementarity.replace('_', ' ')]
+            ];
+            rows.forEach(function(row) {
+              var ttRow = document.createElement('div');
+              ttRow.className = 'tt-row';
+              var s1 = document.createElement('span');
+              s1.textContent = row[0];
+              var s2 = document.createElement('span');
+              s2.className = 'tt-row-val';
+              s2.textContent = row[1];
+              ttRow.appendChild(s1);
+              ttRow.appendChild(s2);
+              tooltip.appendChild(ttRow);
+            });
+          });
+          div.addEventListener('mouseleave', function() { tooltip.style.display = 'none'; });
+        })(cr);
+
+        treemapEl.appendChild(div);
+      });
+    });
+
+    // Legend
+    renderLegend();
+  }
+
+  function renderLegend() {
+    var legendEl = document.getElementById('treemap-legend');
+    legendEl.textContent = '';
+    if (currentMode === 'exposure') {
+      var swatches = [
+        { score: 0.5, label: '0\u20132 Low' },
+        { score: 3.0, label: '2\u20134' },
+        { score: 5.0, label: '4\u20136' },
+        { score: 7.0, label: '6\u20138' },
+        { score: 9.0, label: '8\u201310 High' }
+      ];
+      swatches.forEach(function(s) {
+        var item = document.createElement('span');
+        item.className = 'legend-item';
+        var swatch = document.createElement('span');
+        swatch.className = 'legend-swatch';
+        swatch.style.background = getExposureColor(s.score);
+        item.appendChild(swatch);
+        item.appendChild(document.createTextNode(s.label));
+        legendEl.appendChild(item);
+      });
+    } else {
+      var compSwatches = [
+        { color: '#4a4690', label: 'High (AI augments)' },
+        { color: '#b8943e', label: 'Mixed' },
+        { color: '#a3423a', label: 'Low (AI substitutes)' },
+        { color: '#b5b0a4', label: 'Low exposure' }
+      ];
+      compSwatches.forEach(function(s) {
+        var item = document.createElement('span');
+        item.className = 'legend-item';
+        var swatch = document.createElement('span');
+        swatch.className = 'legend-swatch';
+        swatch.style.background = s.color;
+        item.appendChild(swatch);
+        item.appendChild(document.createTextNode(s.label));
+        legendEl.appendChild(item);
+      });
+    }
+  }
+
+  // Controls
+  document.getElementById('treemap-controls').addEventListener('click', function(e) {
+    if (e.target.tagName !== 'BUTTON') return;
+    currentMode = e.target.getAttribute('data-mode');
+    var btns = document.querySelectorAll('#treemap-controls button');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+    e.target.classList.add('active');
+    render();
+  });
+
+  render();
+
+  // Debounced resize
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(render, 150);
+  });
+})();
+
+/* ================================================================
+   SECTIONS C & D: BAR CHARTS
+   ================================================================ */
+(function() {
+  var all = flatten();
+
+  function buildBarChart(containerId, items) {
+    var container = document.getElementById(containerId);
+    container.textContent = '';
+    items.forEach(function(o) {
+      var pct = (o.score / 10) * 100;
+      var row = document.createElement('div');
+      row.className = 'bar-row';
+
+      var label = document.createElement('div');
+      label.className = 'bar-label';
+      var nameSpan = document.createElement('span');
+      nameSpan.className = 'bar-name';
+      nameSpan.textContent = o.name;
+      label.appendChild(nameSpan);
+      var metaSpan = document.createElement('span');
+      metaSpan.className = 'bar-meta';
+      metaSpan.textContent = formatEmp(o.emp) + ' workers \u00B7 ' + o.group;
+      label.appendChild(metaSpan);
+
+      var track = document.createElement('div');
+      track.className = 'bar-track';
+      var fill = document.createElement('div');
+      fill.className = 'bar-fill';
+      fill.style.width = Math.max(pct, 2) + '%';
+      fill.style.background = getExposureColor(o.score);
+      track.appendChild(fill);
+
+      var score = document.createElement('div');
+      score.className = 'bar-score';
+      score.style.color = getExposureColor(o.score);
+      score.textContent = o.score.toFixed(1);
+
+      row.appendChild(label);
+      row.appendChild(track);
+      row.appendChild(score);
+      container.appendChild(row);
+    });
+  }
+
+  var mostExposed = all.slice().sort(function(a, b) { return b.score - a.score; }).slice(0, 15);
+  buildBarChart('chart-most-exposed', mostExposed);
+
+  var leastExposed = all.slice().sort(function(a, b) { return a.score - b.score; }).slice(0, 15);
+  buildBarChart('chart-least-exposed', leastExposed);
+})();
+
+/* ================================================================
+   SECTION E: HISTOGRAM
+   ================================================================ */
+(function() {
+  var all = flatten();
+  var bins = [];
+  for (var i = 0; i < 10; i++) bins.push({ lo: i, hi: i + 1, emp: 0 });
+  all.forEach(function(o) {
+    var idx = Math.min(Math.floor(o.score), 9);
+    bins[idx].emp += o.emp;
+  });
+
+  var maxEmp = 0;
+  bins.forEach(function(b) { if (b.emp > maxEmp) maxEmp = b.emp; });
+
+  var container = document.getElementById('histogram');
+  container.textContent = '';
+  bins.forEach(function(b) {
+    var hPct = maxEmp > 0 ? (b.emp / maxEmp * 100) : 0;
+    var midScore = (b.lo + b.hi) / 2;
+
+    var wrap = document.createElement('div');
+    wrap.className = 'hist-bar-wrap';
+
+    var labelTop = document.createElement('div');
+    labelTop.className = 'hist-label-top';
+    labelTop.textContent = formatEmp(b.emp);
+    wrap.appendChild(labelTop);
+
+    var bar = document.createElement('div');
+    bar.className = 'hist-bar';
+    bar.style.height = Math.max(hPct, 1) + '%';
+    bar.style.background = getExposureColor(midScore);
+    wrap.appendChild(bar);
+
+    var labelBottom = document.createElement('div');
+    labelBottom.className = 'hist-label-bottom';
+    labelBottom.textContent = b.lo + '\u2013' + b.hi;
+    wrap.appendChild(labelBottom);
+
+    container.appendChild(wrap);
+  });
+})();
+
+/* ================================================================
+   SECTION F: KEY INSIGHTS
+   ================================================================ */
+(function() {
+  var insights = [
+    {
+      lead: 'BPO workers face the sharpest displacement risk.',
+      body: 'The 1.7 million Filipinos in business process outsourcing\u2014customer service representatives, data entry operators, and accounting clerks\u2014occupy roles scoring 9.0 to 9.5 out of 10 on AI exposure. These are predominantly low-complementarity occupations, meaning AI is more likely to substitute rather than augment the work.',
+      source: ''
+    },
+    {
+      lead: 'Women face twice the AI exposure rate of men.',
+      body: 'Roughly 40.3% of employed women are in high-exposure roles, compared to approximately 20% of men. This disparity reflects the concentration of women in clerical support and service occupations\u2014the categories most vulnerable to AI-driven automation.',
+      source: 'ILO, 2026'
+    },
+    {
+      lead: 'The Philippines leads ASEAN in generative AI exposure.',
+      body: 'At 27.2% of workers potentially affected by generative AI, the Philippines exceeds Indonesia (21%), Thailand (22%), and Vietnam (21%). The country\'s large BPO sector, which serves English-speaking markets globally, is a primary driver of this concentration.',
+      source: 'ILO, 2026'
+    }
+  ];
+
+  var container = document.getElementById('insights-content');
+  insights.forEach(function(ins) {
+    var p = document.createElement('p');
+    p.className = 'insight-paragraph';
+
+    var strong = document.createElement('strong');
+    strong.textContent = ins.lead;
+    p.appendChild(strong);
+    p.appendChild(document.createTextNode(' ' + ins.body));
+
+    if (ins.source) {
+      p.appendChild(document.createTextNode(' '));
+      var src = document.createElement('span');
+      src.className = 'insight-source';
+      src.textContent = '(' + ins.source + ')';
+      p.appendChild(src);
+    }
+
+    container.appendChild(p);
+  });
+})();
+
+/* ================================================================
+   FOOTER: METHODOLOGY TOGGLE
+   ================================================================ */
+document.getElementById('meth-toggle').addEventListener('click', function() {
+  var content = document.getElementById('meth-content');
+  var isOpen = content.classList.contains('open');
+  content.classList.toggle('open');
+  this.textContent = 'Methodology ' + (isOpen ? '\u25BE' : '\u25B4');
+});
+</script>
+</body>
+</html>
